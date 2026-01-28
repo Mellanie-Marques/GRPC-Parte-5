@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrProductNotFound = errors.New("produto não encontrado")
 
 type OrderItem struct {
 	ProductCode string  `json:"product_code"`
@@ -9,11 +14,12 @@ type OrderItem struct {
 }
 
 type Order struct {
-	ID         int64       `json:"id"`
-	CustomerID int64       `json:"customer_id"`
-	Status     string      `json:"status"`
-	OrderItems []OrderItem `json:"order_items"`
-	CreatedAt  int64       `json:"created_at"`
+	ID           int64       `json:"id"`
+	CustomerID   int64       `json:"customer_id"`
+	Status       string      `json:"status"`
+	OrderItems   []OrderItem `json:"order_items"`
+	DeliveryDays int32       `json:"delivery_days"`
+	CreatedAt    int64       `json:"created_at"`
 }
 
 func NewOrder(customerId int64, orderItems []OrderItem) Order {

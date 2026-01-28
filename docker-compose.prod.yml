@@ -1,0 +1,170 @@
+# docker-compose.prod.yml
+# Arquivo de configuração para produção
+# Uso: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ms-mysql-prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-MudaPara_SenhaSegura123!}
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+      - ./tmp_create_dbs.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  payment:
+    build:
+      context: .
+      dockerfile: microservices/payment/Dockerfile
+    image: microservices/payment:${IMAGE_TAG:-latest}
+    container_name: ms-payment-prod
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_DRIVER: mysql
+      DATA_SOURCE_URL: root:${MYSQL_ROOT_PASSWORD:-MudaPara_SenhaSegura123!}@tcp(mysql:3306)/payment
+      APPLICATION_PORT: ${PAYMENT_PORT:-3001}
+      ENV: ${ENV:-production}
+    networks:
+      - microservices-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PAYMENT_PORT:-3001}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  order:
+    build:
+      context: .
+      dockerfile: microservices/order/Dockerfile
+    image: microservices/order:${IMAGE_TAG:-latest}
+    container_name: ms-order-prod
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      payment:
+        condition: service_started
+      shipping:
+        condition: service_started
+    environment:
+      PAYMENT_SERVICE_URL: payment:${PAYMENT_PORT:-3001}
+      SHIPPING_SERVICE_URL: shipping:${SHIPPING_PORT:-3002}
+      DB_DRIVER: mysql
+      DATA_SOURCE_URL: root:${MYSQL_ROOT_PASSWORD:-MudaPara_SenhaSegura123!}@tcp(mysql:3306)/order_db
+      APPLICATION_PORT: ${ORDER_PORT:-3000}
+      ENV: ${ENV:-production}
+    networks:
+      - microservices-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${ORDER_PORT:-3000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  shipping:
+    build:
+      context: .
+      dockerfile: microservices/shipping/Dockerfile
+    image: microservices/shipping:${IMAGE_TAG:-latest}
+    container_name: ms-shipping-prod
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APPLICATION_PORT: ${SHIPPING_PORT:-3002}
+      ENV: ${ENV:-production}
+    networks:
+      - microservices-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${SHIPPING_PORT:-3002}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mysql_prod_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MYSQL_DATA_PATH:-./data/mysql}
+
+networks:
+  microservices-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16

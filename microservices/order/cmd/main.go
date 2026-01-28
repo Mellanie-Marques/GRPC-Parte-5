@@ -7,6 +7,7 @@ import (
 	"github.com/Mellanie-Marques/microservices/order/internal/adapter/db"
 	"github.com/Mellanie-Marques/microservices/order/internal/adapter/grpc"
 	"github.com/Mellanie-Marques/microservices/order/internal/adapters/payment"
+	"github.com/Mellanie-Marques/microservices/order/internal/adapters/shipping"
 	"github.com/Mellanie-Marques/microservices/order/internal/application/core/api"
 )
 
@@ -21,7 +22,12 @@ func main() {
 		log.Fatalf("Failed to initialize payment stub. Error: %v", err)
 	}
 
-	application := api.NewApplication(dbAdapter, paymentAdapter)
+	shippingAdapter, err := shipping.NewAdapter(config.GetShippingServiceUrl())
+	if err != nil {
+		log.Fatalf("Failed to initialize shipping stub. Error: %v", err)
+	}
+
+	application := api.NewApplication(dbAdapter, paymentAdapter, dbAdapter, shippingAdapter)
 	grpcAdapter := grpc.NewAdapter(application, config.GetApplicationPort())
 	grpcAdapter.Run()
 }

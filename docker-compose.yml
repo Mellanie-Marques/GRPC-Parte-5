@@ -42,14 +42,31 @@ services:
         condition: service_healthy
       payment:
         condition: service_started
+      shipping:
+        condition: service_started
     environment:
       PAYMENT_SERVICE_URL: payment:3001
+      SHIPPING_SERVICE_URL: shipping:3002
       DB_DRIVER: mysql
       DATA_SOURCE_URL: root:minhasenha@tcp(mysql:3306)/order_db
       APPLICATION_PORT: 3000
       ENV: development
     ports:
       - "3000:3000"
+
+  shipping:
+    build:
+      context: .
+      dockerfile: microservices/shipping/Dockerfile
+    container_name: ms-shipping
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APPLICATION_PORT: 3002
+      ENV: development
+    ports:
+      - "3002:3002"
 
 volumes:
   db_data:

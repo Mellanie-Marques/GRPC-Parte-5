@@ -1,0 +1,134 @@
+# .gitignore - Microsserviços com gRPC
+
+# =============================================
+# AMBIENTE & CONFIGURAÇÃO
+# =============================================
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+*.env
+
+# =============================================
+# BACKUP & DADOS
+# =============================================
+backups/
+data/
+mysql_data/
+*.sql
+backup_*
+dump_*
+
+# =============================================
+# DOCKER
+# =============================================
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# =============================================
+# BINÁRIOS COMPILADOS
+# =============================================
+microservices/order/order
+microservices/order/order.exe
+microservices/payment/payment
+microservices/payment/payment.exe
+microservices/shipping/shipping
+microservices/shipping/shipping.exe
+
+# =============================================
+# GO MODULES
+# =============================================
+go.sum
+vendor/
+
+# =============================================
+# IDE & EDITOR
+# =============================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.env.test
+
+# =============================================
+# LOG FILES
+# =============================================
+*.log
+logs/
+*.out
+
+# =============================================
+# TEST & COVERAGE
+# =============================================
+coverage.out
+coverage.html
+*.test
+
+# =============================================
+# DEPENDENCIES
+# =============================================
+node_modules/
+/dist
+/build
+
+# =============================================
+# PROTOBUF GERADO (comentado - versão de controle)
+# =============================================
+# Descomente se não quiser commitar arquivos .pb.go gerados
+# microservices-proto/golang/**/*.pb.go
+# microservices-proto/golang/**/*_grpc.pb.go
+
+# =============================================
+# SISTEMA OPERACIONAL
+# =============================================
+Thumbs.db
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# =============================================
+# FERRAMENTAS DE DESENVOLVIMENTO
+# =============================================
+.air
+bin/
+dist/
+
+# =============================================
+# ARQUIVOS TEMPORÁRIOS
+# =============================================
+tmp/
+temp/
+*.tmp
+*.bak
+*.temp
+
+# =============================================
+# CERTIFICADOS & CHAVES (SEGURANÇA)
+# =============================================
+*.pem
+*.key
+*.crt
+*.cert
+*.pfx
+*.keystore
+
+# =============================================
+# DOCKER VOLUMES LOCAIS
+# =============================================
+.docker-volumes/
+mysql_data/
+postgres_data/
