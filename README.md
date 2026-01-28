@@ -178,47 +178,6 @@ go run ./cmd/main.go
 go test ./...
 ```
 
-## 🔍 Troubleshooting
-
-| Problema | Solução |
-|----------|---------|
-| Porta já em uso | Mude em `.env` ou `docker-compose.yml` |
-| MySQL não conecta | Aguarde ~5s, confira senha em `.env` |
-| gRPC timeout | Verifique se serviços estão up: `docker ps` |
-| Imagens grandes | Use `make docker-prune` para limpar |
-| Erro de build | Delete `go.mod` e `go.sum`, rode `go mod tidy` |
-
-## 📦 Backup
-
-```bash
-# Backup automático
-make db-backup
-
-# Restaurar
-make db-restore
-```
-
-Backups ficam em `backups/` com timestamp.
-
-## ✅ Health Checks
-
-Todos os serviços têm health checks automáticos:
-
-```bash
-# Ver status
-docker-compose ps
-
-# Ou
-make status
-```
-
-## 🔐 Segurança em Produção
-
-- Use `docker-compose.prod.yml` com resource limits
-- Configure variáveis de ambiente em `.env` (não commite)
-- Use secrets do Docker em produção
-- Ative logging centralizado (ELK Stack opcional)
-
 ## 📚 Tecnologias
 
 - **Go** 1.24
